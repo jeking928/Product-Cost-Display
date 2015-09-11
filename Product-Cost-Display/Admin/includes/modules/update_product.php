@@ -1,11 +1,11 @@
 <?php
 /**
  * @package admin
- * @copyright Copyright 2003-2011 Zen Cart Development Team
+ * @copyright Copyright 2003-2014 Zen Cart Development Team
  * @copyright Portions Copyright 2003 osCommerce
  * @license http://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
- * @version $Id: update_product.php 18695 2011-05-04 05:24:19Z drbyte $
- * EDITED FOR cost 7/10/12 ZEN CART V1.5
+ * @version GIT: $Id: Author: DrByte  Jun 30 2014 Modified in v1.5.4 $
+ * Product Cost Display v1.1
  */
   if (!defined('IS_ADMIN_FLAG')) {
     die('Illegal Access');
@@ -43,7 +43,7 @@
                             'manufacturers_id' => $manufacturers_id,
                             'products_quantity_order_min' => zen_db_prepare_input($_POST['products_quantity_order_min']),
                             'products_quantity_order_units' => zen_db_prepare_input($_POST['products_quantity_order_units']),
-                            'products_priced_by_attribute' => zen_db_prepare_input($_POST['products_priced_by_attribute']),
+                            'products_priced_by_attribute' => zen_db_prepare_input((int)$_POST['products_priced_by_attribute']),
                             'product_is_free' => zen_db_prepare_input((int)$_POST['product_is_free']),
                             'product_is_call' => zen_db_prepare_input((int)$_POST['product_is_call']),
                             'products_quantity_mixed' => zen_db_prepare_input($_POST['products_quantity_mixed']),
@@ -66,11 +66,6 @@
       $new_image= 'false';
     }
 
-if ($_POST['image_delete'] == 1) {
-      $sql_data_array['products_image'] = '';
-      $new_image= 'false';
-}
-
     if ($action == 'insert_product') {
       $insert_sql_data = array( 'products_date_added' => 'now()',
                                 'master_categories_id' => (int)$current_category_id);
@@ -87,6 +82,8 @@ if ($_POST['image_delete'] == 1) {
                     (products_id, categories_id)
                     values ('" . (int)$products_id . "', '" . (int)$current_category_id . "')");
 
+      zen_record_admin_activity('New product ' . (int)$products_id . ' added via admin console.', 'info');
+
       ///////////////////////////////////////////////////////
       //// INSERT PRODUCT-TYPE-SPECIFIC *INSERTS* HERE //////
 
@@ -100,6 +97,8 @@ if ($_POST['image_delete'] == 1) {
       $sql_data_array = array_merge($sql_data_array, $update_sql_data);
 
       zen_db_perform(TABLE_PRODUCTS, $sql_data_array, 'update', "products_id = '" . (int)$products_id . "'");
+
+      zen_record_admin_activity('Updated product ' . (int)$products_id . ' via admin console.', 'info');
 
       // reset products_price_sorter for searches etc.
       zen_update_products_price_sorter((int)$products_id);
